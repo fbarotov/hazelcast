@@ -29,6 +29,8 @@ import com.hazelcast.spi.impl.operationservice.ExceptionAction;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.hazelcast.internal.serialization.impl.SerializationUtil.readCollection;
 import static com.hazelcast.internal.serialization.impl.SerializationUtil.writeCollection;
@@ -56,6 +58,18 @@ public class PublishCompletedMigrationsOperation extends AbstractPartitionOperat
     public void run() {
         InternalPartitionServiceImpl service = getService();
         success = service.applyCompletedMigrations(completedMigrations, getCallerAddress());
+
+        final String endl = System.lineSeparator();
+
+        StringBuilder sb = new StringBuilder()
+                .append("applied completed migrations: ").append(endl)
+                .append(completedMigrations.stream()
+                        .map(Objects::toString)
+                        .collect(Collectors.joining(endl))).append(endl)
+                .append("success = ")
+                .append(success).append(endl);
+
+        getLogger().warning(sb.toString());
     }
 
     @Override
